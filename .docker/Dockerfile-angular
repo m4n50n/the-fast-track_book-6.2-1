@@ -1,0 +1,64 @@
+ARG NODE_VER
+ARG NPM_VER
+ARG ANGULAR_VER
+ARG ANGULAR_CLI_VER
+ARG TYSCRIPT_VER
+ARG RxJS_VER
+ARG WWW_PATH_INT
+ARG ANGULAR_PORT
+ARG ANGULAR_PORT_1
+ARG ANGULAR_PORT_2
+ARG ANGULAR_PORT_3
+ARG ANGULAR_PORT_4
+ARG ANGULAR_PORT_5
+ARG ANGULAR_PORT_6
+ARG ANGULAR_PORT_7
+ARG ANGULAR_PORT_8
+ARG ANGULAR_PORT_9
+ARG ANGULAR_PORT_0
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# FROM node:18-buster
+FROM node:${NODE_VER}-buster
+
+# linux packages
+RUN apt update && apt install -y git wget nano curl p7zip-full unzip screen htop
+
+### angular-cli
+RUN npm install -g @angular/cli@${ANGULAR_CLI_VER} 
+
+### npm ver
+# RUN npm install -g npm@{NPM_VER} 
+
+# ### TypeScript
+# RUN npm install -g typescript@${TYSCRIPT_VER} 
+
+# ### RxJS
+# RUN npm install -g rxjs@${RxJS_VER} 
+
+# Clean up
+RUN apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+### create node_modules
+# RUN mkdir ${WWW_PATH_INT}/node_modules
+# RUN chown node:node ${WWW_PATH_INT}node_modules
+    
+### if create project with script
+RUN mkdir -p /scripts
+COPY ../scripts/scriptActionsParams.sh /scripts
+RUN chmod +x /scripts/scriptActionsParams.sh
+
+### Port
+# EXPOSE ${ANGULAR_PORT} ${ANGULAR_PORT_1} ${ANGULAR_PORT_2} ${ANGULAR_PORT_3} ${ANGULAR_PORT_4}
+
+### set in path
+# WORKDIR ${WWW_PATH_INT}
+# RUN npm install @angular-devkit/build-angular
+# RUN npm install
+# CMD ["npm", "start"]
+
+# Default ENTRYPOINT, EXPOSE and CMD:
+# https://github.com/nodejs/docker-node

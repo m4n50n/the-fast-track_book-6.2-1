@@ -1,0 +1,92 @@
+ARG PHP_VER
+ARG DEBIAN_FRONTEND=noninteractive
+
+# ARG CLEAN_PROJECT
+# ARG CREATE_SYMFONY
+# ARG COMPOSE_PROJECT_NAME
+
+FROM php:${PHP_VER}-fpm-buster
+# FROM php:${PHP_VER}-fpm
+# there is no sqlsrv support on bullseye right now
+
+RUN apt update && apt install -y git wget nano curl p7zip-full unzip screen \
+    apt-transport-https ca-certificates software-properties-common \
+    gnupg \
+    && docker-php-ext-install pdo
+
+### install-php-extensions
+# https://github.com/mlocati/docker-php-extension-installer
+# https://github.com/mlocati/docker-php-extension-installer#special-requirements
+RUN curl -sSLf -o /usr/local/bin/install-php-extensions \
+        https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+    chmod +x /usr/local/bin/install-php-extensions
+RUN install-php-extensions apcu intl opcache timezonedb zip
+RUN install-php-extensions mysqli pdo_mysql
+RUN install-php-extensions pgsql pdo_pgsql
+### install-php-extensions
+
+### composer
+RUN wget https://raw.githubusercontent.com/composer/getcomposer.org/main/web/installer -O - | php -- && \
+    chmod +x composer.phar && \
+    mv composer.phar /usr/local/bin/composer
+### composer
+
+### symfony-cli
+RUN wget https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_linux_amd64.tar.gz && \
+    tar zxvf symfony-cli_linux_amd64.tar.gz && \
+    mv symfony /usr/local/bin/
+### symfony-cli
+
+# ### SQLServer
+# # RUN apt install software-properties-common
+# RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+# # RUN curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d
+# COPY ../configFiles/mssql-release.list /etc/apt/sources.list.d/mssql-release.list
+# RUN apt-get update 
+# RUN ACCEPT_EULA=Y apt install -y msodbcsql17
+# RUN ACCEPT_EULA=Y apt install -y mssql-tools
+# # php sqlserver extension
+# RUN install-php-extensions sqlsrv pdo_sqlsrv
+
+# ### To use command sqlcmd in console
+# RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
+# RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+# # then you can use: sqlcmd -S <remoteip> -U <user> -p -Q "SELECT @@VERSION"
+# ### SQLServer
+
+# Install xdebug
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+# Install Redis
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Redis-cli
+# RUN apt update && apt install -y redis-cli
+
+# probe php
+RUN php -m && php -v
+
+# Clean up
+RUN apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*   
+
+# Configs
+RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+# Opessl Error
+RUN sed -i -E 's/(CipherString\s*=\s*DEFAULT@SECLEVEL=)2/\11/' /etc/ssl/openssl.cnf
+
+# uid 1000 matchs devel host user
+RUN usermod -u 1000 www-data && groupmod -g 1000 www-data && chown -R www-data:www-data /var/www
+
+### if create symfony project
+RUN mkdir -p /scripts
+# WORKDIR /scripts
+# COPY scripts/scriptActions.sh /scripts
+# RUN chmod +x /scripts/scriptActions.sh
+# COPY scripts/scriptActionsParams.sh /scripts
+# RUN chmod +x /scripts/scriptActionsParams.sh
+COPY ../scripts/scriptActionsParams.sh /scripts
+RUN chmod +x /scripts/scriptActionsParams.sh
+
+# Default ENTRYPOINT, EXPOSE and CMD:
+# https://github.com/docker-library/php/blob/master/8.1/buster/fpm/Dockerfile
