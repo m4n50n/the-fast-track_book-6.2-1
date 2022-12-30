@@ -158,7 +158,7 @@ Una vez instalado (podemos buscarlo en https://github.com/symfony/recipes y en s
    - https://symfony.com/doc/6.2/the-fast-track/en/9-backend.html#customizing-easyadmin
    - https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-configuration
 
-#### Events y Subscribers
+#### Escuchando eventos
 https://symfony.com/doc/current/components/event_dispatcher.html
 
 Symfony cuenta con un componente propio para disparar o lanzar elementos: ***Event Dispatcher***. Estos eventos pueden ser escuchados por los ***Subscribers***, que reaccionarán a lo ocurrido.
