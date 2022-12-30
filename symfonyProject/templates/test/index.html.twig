@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello TestController!{% endblock %}
+
+{% block body %}
+    <!-- Esta plantilla hereda el código HTML de un código base (base.html.twit), por lo que aquí sólo estableceremos qué queremos insertar en cada elemento básico del html (title, body, etc...) -->
+    <h1>Hello Query --> {{greet_query}}</h1>
+    <h1>Hello Path --> {{greet_path}}</h1>
+{% endblock %}

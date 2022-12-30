@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Controller\Admin;
+
+use App\Entity\Comment;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+
+class CommentCrudController extends AbstractCrudController
+{
+    public static function getEntityFqcn(): string
+    {
+        return Comment::class;
+    }
+
+    public function configureFields(string $pageName): iterable
+    {
+        # Con return podemos indicar directamente la estructura de columnas
+        return [
+            // IdField::new('id'),
+            TextField::new('author', "Autor"),
+            // TextEditorField::new('text'),
+            TextareaField::new('text', "Texto"),
+            TextField::new('email', "Email"),
+            DateTimeField::new('createdAt', "Fecha"),
+            TextField::new('photoFilename', "Avatar"),
+            TextField::new('status', "Status"),
+            # https://symfony.com/doc/4.x/EasyAdminBundle/fields/AssociationField.html  
+            # https://stackoverflow.com/questions/71780750/how-to-use-association-field-in-symfony-easyadmin-4          
+            # AssociationField::new('conference', 'Conference'), // Al montar este selector así, automáticamente se llama al método __toString() de la entidad Conference y el valor que nos muestra es lo que retorna el método. De otra manera no podría "pintarlo" en pantalla
+            AssociationField::new('conference', 'Conferencia')
+                ->setCrudController(ConferenceCrudController::class),
+            // TextField::new('author', 'Author_Detail')
+            //     ->formatValue(static fn (string $author): string => "El autor es " . $author)        
+        ];
+
+        // Esta forma funciona también y monta automáticamente los inputs, pero no acepta foreign keys
+        // return [
+        //     'id',
+        //     'author',
+        //     'text',
+        //     'email',
+        //     'createdAt',
+        //     'photoFilename'            
+        // ];
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInPlural("Comentarios")
+            ->setEntityLabelInSingular("Comentario")
+            ->setDefaultSort(["id" => "asc"]);
+    }
+}

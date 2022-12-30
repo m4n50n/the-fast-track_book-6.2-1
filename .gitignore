@@ -6,8 +6,6 @@
 */public/bundles/
 */var/
 */vendor/
-*/db_data_pgsql
-*/redis_data
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###
@@ -19,3 +17,8 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
+###> custom ignores ###
+*/db_data_pgsql
+*/redis_data
+###< custom ignores ###

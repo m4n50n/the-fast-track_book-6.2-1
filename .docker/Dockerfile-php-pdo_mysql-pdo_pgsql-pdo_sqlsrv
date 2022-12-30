@@ -66,16 +66,6 @@ RUN pecl install redis && docker-php-ext-enable redis
 # probe php
 RUN php -m && php -v
 
-# docker https://docs.docker.com/engine/install/debian/#install-using-the-repository
-# RUN apt-get update
-# RUN mkdir -p /etc/apt/keyrings
-# RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-# RUN echo \
-#   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-#   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-# RUN apt-get update
-# RUN apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
-
 RUN symfony server:ca:install
 
 # Clean up
@@ -100,6 +90,10 @@ RUN mkdir -p /scripts
 # RUN chmod +x /scripts/scriptActionsParams.sh
 COPY ../scripts/scriptActionsParams.sh /scripts
 RUN chmod +x /scripts/scriptActionsParams.sh
+
+RUN git config --global user.email "josegarciarodriguez89@hotmail.com"
+RUN git config --global user.name "Jose Clemente Garcia Rodriguez"
+RUN git config --global --add safe.directory /var/www/symfonyProject
 
 # Default ENTRYPOINT, EXPOSE and CMD:
 # https://github.com/docker-library/php/blob/master/8.1/buster/fpm/Dockerfile

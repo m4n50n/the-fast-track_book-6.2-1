@@ -1,0 +1,30 @@
+git config --global user.email "josegarciarodriguez89@hotmail.com"
+git config --global user.name "Jose Clemente Garcia Rodriguez"
+git config --global --add safe.directory /var/www/symfonyProject
+php -v
+php -m
+symfony console -V
+symfony version
+symfony book:check-requirements    
+symfony new symfonyProject --version=6.2 --webapp
+mkdir public/images/
+php -r "copy('http://clipartmag.com/images/website-under-construction-image-6.gif', 'public/images/under-construction.gif');"
+symfony composer require profiler --dev
+symfony composer require logger
+symfony composer require debug --dev
+symfony composer require symfony/maker-bundle --dev
+symfony console list make
+symfony composer require annotations
+symfony console make:controller ConferenceController
+symfony console make:controller TestController
+symfony composer require twig
+symfony composer require orm
+symfony console doctrine:database:create
+symfony console make:entity Conference
+symfony console make:entity Comment
+symfony console make:migration
+symfony console doctrine:migrations:status
+symfony console doctrine:migrations:migrate
+symfony composer require "admin:^4"
+symfony console make:admin:dashboard
+symfony console make:admin:crud
