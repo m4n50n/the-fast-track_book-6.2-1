@@ -34,3 +34,8 @@ symfony console make:subscriber TwigEventSubscriber
 symfony composer require security
 symfony console make:user Admin
 symfony console make:auth
+symfony composer require messenger
+symfony console messenger:consume async -vv
+symfony run -d --watch=config,src,templates,vendor symfony console messenger:consume async -vv
+symfony server:log
+symfony server:status

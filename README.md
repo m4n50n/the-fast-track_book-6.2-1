@@ -1,5 +1,5 @@
 ## Symfony 6: La Vía Rápida
-https://symfony.com/doc/6.2/the-fast-track/en/index.html
+https://symfony.com/doc/6.2/the-fast-track/en/index.html (Los pasos y toda la documentación que se sigue parte de aquí)
 
 <small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig, formularios (todo lo del frontend) y con los tests unitarios (aunque se realizan todos los pasos siguiendo la documentación).</small>
 
@@ -248,33 +248,55 @@ Usaremos la API de Akismet (https://akismet.com/) para validar si los comentario
 
 Crearemos la clase `/src/SpamChecker.php`, donde irá toda la lógica para este proceso. Para terminar, apuntaremos a este proceso en `ConferenceController.php` para que detecte si un comentario es SPAM o no a la hora de hacer un insert, por ejemplo.
 
+Esto funcionará obviamente al insertar comentarios en el formulario del front. Para que funcione en los CRUDs del panel de administración habría que implementar allí la llamada a SpamChecker.
+
 https://akismet.com/development/api/#detailed-docs
 https://akismet.com/development/api/#comment-check
 
 #### Asincronía
 Las tareas asíncronas nos permitirán ejecutar acciones sin necesidad de hacer esperar al usuario cuando dichas acciones no forman parte del objetivo principal de lo que se está haciendo.
 
-Por ejemplo, si dispusiéramos de un método que validara si un comentario es *SPAM* o no cuando un usuario inserta un nuevo comentario, tendría sentido que el usuario tuviera que esperar una respuesta a la hora de hacer el insert de dicho comentario pero no que tuviera que esperar a que se ejecute la API que lo valide posteriormente. En este caso, ese método de validación debería ser asíncrono.
+Por ejemplo, cuando un usuario inserta un comentario y llamamos a la API de Akismet para saber si es SPAM o no, tiene sentido que el usuario espere la respuesta del insert, pero no de la comprobación de SPAM (ya que la velocidad de respuesta va a depender de la API de Akismet y esto no podemos controlarlo). En este caso, el método de comprobación de SPAM debería ser asíncrono.
 
 https://symfony.com/doc/current/messenger.html
 
 El componente <u>***Messenger***</u> es el encargado de gestionar el código asíncrono cuando usamos Symfony. Para instalarlo:
 `symfony composer require messenger` - Esto creará también el fichero *messenger.yaml* y agregará variables de entorno en el fichero *.env*
-`symfony composer require redis-messenger` - Instalar el messenger de Redis para usar Redis como cola de mensajes
+`symfony composer require redis-messenger` - Instalar el messenger de Redis para usar Redis como cola de mensajes en caso de ser necesario.
 
-Cuando algún proceso deba ser ejecutado de forma asíncrona:
-1. Se envía un mensaje al bus de mensajería
-2. Este lo almacena en una cola
-3. El flujo de trabajo se reanuda y sigue ejecutándose
+Cuando alguna lógica deba ejecutarse de forma asíncrona, se envía un mensaje al bus de mensajería, el cual almacena el mensaje en una cola y regresa inmediatamente para permitir que el flujo de trabajo se reanude lo más rápido posible.
 
-Por otro lado, habrá un ***consumidor*** que estará ejecutándose continuamente en segundo plano para leer los mensajes encolados y ejecutar la lógica asociada. El consumidor podrá estar en el mismo servidor o en uno separado (en caso de que usemos Redis, por ejemplo).
+Por otro lado, habrá un *consumidor* (*consumer*) que estará ejecutándose continuamente en segundo plano para leer los mensajes encolados y ejecutar la lógica asociada. El consumidor podrá estar en el mismo servidor o en uno separado (en caso de que usemos Redis, por ejemplo).
 
 Toda la lógica se dividirá en dos elementos (objetos):
-- <u>Mensaje</u>: Será una clase que contendrá el mensaje que será transmitido. La clase solo almacenará el código del mensaje, el cual será serializado "por debajo" para almacenarse en la cola. La clase contendrá únicamente un id y un array de datos extra llamado *contexto*.
-- <u>Manejador del mensaje</u>: será una especie de *controlador* que recibe un objeto ***mensaje*** y se encarga de procesarlo. Este ***handler*** será el que deba interactuar, en nuestro ejemplo, con el validador de SPAM.
+- <u>Mensaje</u>: Será una clase que contendrá el mensaje que será transmitido. La clase solo almacenará el código del mensaje, el cual será serializado "por debajo" para almacenarse en la cola. La clase contendrá únicamente un id y un array de datos extra llamado *contexto*. La crearemos en `src/Message/CommentMessage.php`.
+- <u>Manejador del mensaje</u>: será una especie de *controlador* que recibe un objeto ***mensaje*** y se encarga de procesarlo. Este ***handler*** será el que deba interactuar, en nuestro ejemplo, con el validador de SPAM. Lo crearemos en `src/MessageHandler/CommentMessageHandler.php`.
 
 Por defecto, los manejadores son llamados sincrónicamente, así que para que sean ***asíncronos*** es necesario configurar explícitamente la cola a utilizar para cada handler en la configuración del messenger (en *messenger.yml*).
-  
+
+Para probar todo esto, insertamos un nuevo comentario (desde el formulario) cuando toda la lógica esté aplicada y veremos que se inserta con *pending* en la columna *status*.
+
+Posteriormente ejecutaremos el consumidor manualmente con el comando:
+`symfony console messenger:consume async -vv`
+
+En lugar de iniciar el consumidor cada vez que se inserta un comentario y luego pararlo con control + C, usaremos Symfony CLI para que use un demonio en su lugar y lo ejecute en segundo plano.
+
+`symfony run -d --watch=config,src,templates,vendor symfony console messenger:consume async -vv
+`
+
+La opción  `--watch` le dice a Symfony que el comando debe reiniciarse siempre que haya un cambio en el sistema de archivos en los directorios `/config/`, `/src/`, `/templates/` o `/vendor/`.
+
+Para ver los logs y los trabajos en ejecución:
+- `symfony server:log`
+- `symfony server:status`
+
+##### Reintentar mensajes fallidos
+En caso de que el mensaje se pierda y no se llegue a verificar (porque Akismet esté caído, por ejemplo), *Messenger* puede realizar reintentos. Esto se configura por defecto en `config/packages/messenger.yaml` (https://symfony.com/doc/6.2/the-fast-track/en/18-async.html#retrying-failed-messages). En la parte de `max_retries` se configurará el número de veces que el consumidor intentará manejar el mensaje. Además, en caso de fallo lo almacenará en la cola configurada en `failed` en lugar de descartarlo.
+
+Mediante los siguientes comandos podremos ver los mensajes fallidos y reintentarlos manualmente:
+`symfony console messenger:failed:show`
+`symfony console messenger:failed:retry`
+
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
 https://www.php.net/manual/es/language.generators.syntax.php#:~:text=En%20su%20forma%20m%C3%A1s%20simple,ejecuci%C3%B3n%20de%20la%20funci%C3%B3n%20generadora
