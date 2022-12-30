@@ -44,7 +44,7 @@ class Comment
 
     public function __construct()
     {
-        $this->status = "pending"; // Pending status by default
+        $this->status = "PENDING"; // Pending status by default
     }
 
     /**

@@ -1,7 +1,7 @@
 ## Symfony 6: La Vía Rápida
 https://symfony.com/doc/6.2/the-fast-track/en/index.html (Los pasos y toda la documentación que se sigue parte de aquí)
 
-<small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig, formularios (todo lo del frontend) y con los tests unitarios (aunque se realizan todos los pasos siguiendo la documentación).</small>
+<small>**He documentado y desarrollado todo el proyecto excepto la parte de twig, formularios y frontend que sólo la he desarrollado pero no documentado y luego, las partes de test, workflow y emails de admin (pasos 17, 19, 20) no están ni desarrolladas ni documentadas.</small>
 
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
@@ -296,6 +296,11 @@ En caso de que el mensaje se pierda y no se llegue a verificar (porque Akismet e
 Mediante los siguientes comandos podremos ver los mensajes fallidos y reintentarlos manualmente:
 `symfony console messenger:failed:show`
 `symfony console messenger:failed:retry`
+
+#### Workflow
+Un workflow o flujo de trabajo es la definición de rutas, acciones y cambios de estado posibles para objetos que van "avanzando" en una lógica de negocio en particular.
+
+En este proyecto, tendría sentido para por ejemplo hacer que un administrador aprobase o rechazase un mensaje después de la verificación de SPAM.
 
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
