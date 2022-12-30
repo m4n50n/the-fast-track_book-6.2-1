@@ -26,7 +26,7 @@ class ConferenceController extends AbstractController
     ) {
     }
 
-    #[Route('/', name: 'app_conference')]
+    #[Route('/', name: 'homepage')]
     // public function index(): Response
     // public function index(Environment $twig, ConferenceRepository $conferenceRepository): Response
     public function index(ConferenceRepository $conferenceRepository): Response
@@ -49,7 +49,8 @@ class ConferenceController extends AbstractController
         return $this->render('conference/index.html.twig', [
             'conferences' => $conferenceRepository->findAll(),
             // ]));
-        ]);
+            // ]);
+        ])->setSharedMaxAge(3605); # Guardar la caché de esta página durante una hora
     }
 
     # #[Route('/conference/{id}', name: 'conference')]
@@ -62,7 +63,7 @@ class ConferenceController extends AbstractController
         Request $request,
         Conference $conference,
         CommentRepository $commentRepository,
-        ConferenceRepository $conferenceRepository,        
+        ConferenceRepository $conferenceRepository,
         #[Autowire('%photo_dir%')] string $photoDir,
     ): Response {
         $comment = new Comment();
@@ -89,7 +90,7 @@ class ConferenceController extends AbstractController
                 'user_agent' => $request->headers->get('user-agent'),
                 'referrer' => $request->headers->get('referer'),
                 'permalink' => $request->getUri(),
-            ];            
+            ];
 
             // En este momento insertamos el comentario y enviamos un mensaje al bus de mensajería
             $this->bus->dispatch(new CommentMessage($comment->getId(), $context));

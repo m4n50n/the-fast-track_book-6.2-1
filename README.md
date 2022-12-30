@@ -1,7 +1,7 @@
 ## Symfony 6: La Vía Rápida
 https://symfony.com/doc/6.2/the-fast-track/en/index.html (Los pasos y toda la documentación que se sigue parte de aquí)
 
-<small>**He documentado y desarrollado todo el proyecto excepto la parte de twig, formularios y frontend que sólo la he desarrollado pero no documentado y luego, las partes de test, workflow y emails de admin (pasos 17, 19, 20) no están ni desarrolladas ni documentadas.</small>
+<small>**He documentado y desarrollado todo el proyecto excepto la parte de twig, formularios y frontend que sólo la he desarrollado pero no documentado y luego, las partes de test, workflow, emails de admin y cache (pasos 17, 19, 20, 21) no están ni desarrolladas ni documentadas. En el paso 21 sí que he configurado HTTP caché pero no funciona.</small>
 
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
@@ -300,7 +300,23 @@ Mediante los siguientes comandos podremos ver los mensajes fallidos y reintentar
 #### Workflow
 Un workflow o flujo de trabajo es la definición de rutas, acciones y cambios de estado posibles para objetos que van "avanzando" en una lógica de negocio en particular.
 
-En este proyecto, tendría sentido para por ejemplo hacer que un administrador aprobase o rechazase un mensaje después de la verificación de SPAM.
+En este proyecto, tendría sentido para por ejemplo hacer que un administrador aprobase o rechazase un mensaje después de la verificación de SPAM. Por ahora no lo aplicaremos en este proyecto.
+
+#### Almacenando en caché para mejorar el rendimiento
+La velocidad del sitio puede verse afectada por varias razones: logs muy grandes, sentencias SQL no optimizadas, índices no definidos en la base de datos, sentencias sencillas que se repiten muchas veces, imágenes pesadas, falta de optimización en general, etc...
+
+Veremos 3 estrategias relacionadas con el uso de la caché de la aplicación:
+
+***Caché HTTP***: Esta caché es útil para páginas que no son dinámicas o que no necesitan serlo constantemente, como por ejemplo la página de inicio de una web. En esta página podemos establecer una caché que no cambie en horas o días.
+
+En este caso agregaremos una caché de proxy inverso para habilitar el almacenamiento en caché. Modificaremos el método `setSharedMaxAge()` en nuestra página de inicio (que se corresponde en este caso con el `ConferenceController.php`) para configurar la caducidad (en segundos) de la memoria caché del navegador para proxies inversos. 
+
+Deberemos configurar el fichero `framework.yaml` y propiedad `http_cache` para habilitar el proxy inverso HTTP.
+
+*<u>Importante</u>*: en este caso lo que hacemos no es del todo correcto, ya que el controlador de conferencias puede llegar a ser muy dinámico al ir insertando conferencias sin refrescar la caché, pero como es la que tenemos asignada como página de inicio lo dejaremos así para probar.
+
+***Evitando consultas SQL con ESI***: No desarrollada en este proyecto
+***Caché para operaciones pesadas***: No desarrollada en este proyecto 
 
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
