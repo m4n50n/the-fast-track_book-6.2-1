@@ -159,13 +159,57 @@ Una vez instalado (podemos buscarlo en https://github.com/symfony/recipes y en s
    - https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-configuration
 
 #### Escuchando eventos
+https://symfony.com/doc/6.2/the-fast-track/en/12-event.html#discovering-symfony-events
+
 https://symfony.com/doc/current/components/event_dispatcher.html
 
-Symfony cuenta con un componente propio para disparar o lanzar elementos: ***Event Dispatcher***. Estos eventos pueden ser escuchados por los ***Subscribers***, que reaccionarán a lo ocurrido.
+Symfony cuenta con un componente propio para disparar o lanzar elementos: *Event Dispatcher*. Este componente envía ciertos eventos en momentos específicos que los *listeners* pueden escuchar. Estos *listeners* son hooks internos de Symfony. 
 
-<u>Para poder detectar un evento</u> podemos crear un suscriptor (subscriber) que contenga un método estático `getSubscriberdEvents()` que permitirá la configuración.
+Algunos eventos permiten interactuar con el ciclo de vida de las solicitudes HTTP. Durante el manejo de una solicitud, el dispatcher envia eventos cuando se crea una solicitud, cuando un controlador está a punto de ejecutarse, cuando una respuesta está lista, cuando se lanza una excepción, etc ... Un listener podrá escuchar uno o más eventos y ejecutar alguna lógica basada en el contexto del evento.
 
-Para crear un subscriber podemos usar el ***maker-bundle*** de Symfony haciendo `symfony console make:subscriber`
+Muchos componentes y bundles de Symfony como Security, Messenger, Workflow o Mailer utilizan los eventos.
+
+Para evitar tener un archivo de configuración que describa qué eventos necesita escuchar un listener, crearemos *suscriptores* (subscribers). Un subscriber es un oyente que detectará el evento y que dispondrá de un método estático `getSubscribedEvents()` que devolverá la configuración. Esto permite que los suscriptores se registren en el dispatcher de Symfony automáticamente.
+
+Para crear un subscriber podemos usar el *maker-bundle* de Symfony haciendo `symfony console make:subscriber`. Al crearlo, nos pedirá un nombre y el evento que debe escuchar (por ejemplo, `Symfony\Component\HttpKernel\Event\ControllerEvent`, que es el que se envía justo antes de que se llame a un controlador. De esta manera podríamos inyectar una variable global, por ejemplo, para que el controlador pueda disponer de ella cuando se ejecute). 
+
+De esta forma podríamos realizar <u><i>callbacks complejos</i></u> para eventos de Doctrine, por ejemplo.
+
+<u>Explicación detallada:</u>
+En Symfony, un listener es una clase que se suscribe a un evento y que es notificada cada vez que se dispara ese evento. Un listener puede ser cualquier clase que implemente el método *onEventName* para manejar el evento, donde *EventName* es el nombre del evento que está escuchando. Los listeners se pueden utilizar para hacer cosas como modificar el comportamiento de la aplicación cuando se dispara un evento, o para realizar tareas secundarias cuando se dispara un evento.
+
+Por otro lado, un subscriber es una clase que se suscribe a un conjunto de eventos y que puede manejar varios eventos de manera centralizada. Un subscriber es un tipo especial de listener que implementa el método *getSubscribedEvents()* para devolver una lista de eventos a los que se suscribe y los métodos de manejo de eventos correspondientes. Los subscribers se utilizan para organizar mejor el código y evitar tener muchos listeners individuales para manejar diferentes eventos.
+
+En resumen, un listener es una clase que se suscribe a un solo evento y maneja ese evento, mientras que un subscriber es una clase que se suscribe a varios eventos y maneja esos eventos de manera centralizada. Ambas clases se utilizan para realizar tareas cuando se dispara un evento en la aplicación Symfony.
+
+Los listeners y subscribers se suelen registrar como servicios en el archivo "services.yaml" de la aplicación.
+
+Para registrar un listener como servicio en *services.yaml*, debes especificar el nombre del servicio, la clase del listener y cualquier parámetro que necesite el listener. Luego, debes utilizar la anotación "@event_dispatcher.listener" para indicar qué eventos debe manejar el listener. Por ejemplo:
+
+```yaml
+services:
+  app.listener.example:
+    class: App\Listener\ExampleListener
+    arguments: ['@doctrine.orm.entity_manager']
+    tags:
+      - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+```
+
+Para registrar un subscriber como servicio en "services.yaml", debes especificar el nombre del servicio, la clase del subscriber y cualquier parámetro que necesite el subscriber. Luego, debes utilizar la anotación "@event_dispatcher.subscriber" para indicar qué eventos debe manejar el subscriber. Por ejemplo:
+
+```yaml
+services:
+  app.subscriber.example:
+    class: App\Subscriber\ExampleSubscriber
+    arguments: ['@doctrine.orm.entity_manager']
+    tags:
+      - { name: kernel.event_subscriber }
+```
+
+
+Es importante tener en cuenta que no hay una regla fija sobre cómo debes utilizar listeners o subscribers en Symfony. Depende de tus necesidades y de cómo quieras organizar tu código. Ambos pueden ser útiles en diferentes situaciones y puedes utilizar una combinación de ambos según sea necesario.
+
+Puedes especificar qué listeners deben utilizarse para manejar diferentes eventos de seguridad, como por ejemplo el evento *InteractiveLoginEvent* que se dispara cuando un usuario inicia sesión de manera interactiva. Puedes utilizar un listener para realizar tareas adicionales cuando se dispara este evento, como por ejemplo actualizar el último inicio de sesión del usuario en la base de datos.
    
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
