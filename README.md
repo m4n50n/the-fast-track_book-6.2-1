@@ -1,7 +1,7 @@
 ## Symfony 6: La Vía Rápida
 https://symfony.com/doc/6.2/the-fast-track/en/index.html
 
-<small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig, formularios y todo lo del frontend (aunque se realizan todos los pasos siguiendo la documentación).</small>
+<small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig, formularios (todo lo del frontend) y con los tests unitarios (aunque se realizan todos los pasos siguiendo la documentación).</small>
 
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
@@ -242,6 +242,38 @@ Cómo realizar <u>callbacks simples</u>:
 - `#[ORM\PostUpdate]`: Triggered con updates. <i>Comentario añadido al método a ejecutar</i>
 
 **Los <u>callbacks complejos</u> se explica en la parte de *listeners* y *subscribers*.
+
+#### Akismet (Control de SPAM)
+Usaremos la API de Akismet (https://akismet.com/) para validar si los comentarios son considerados (o no) como SPAM. 
+
+Crearemos la clase `/src/SpamChecker.php`, donde irá toda la lógica para este proceso. Para terminar, apuntaremos a este proceso en `ConferenceController.php` para que detecte si un comentario es SPAM o no a la hora de hacer un insert, por ejemplo.
+
+https://akismet.com/development/api/#detailed-docs
+https://akismet.com/development/api/#comment-check
+
+#### Asincronía
+Las tareas asíncronas nos permitirán ejecutar acciones sin necesidad de hacer esperar al usuario cuando dichas acciones no forman parte del objetivo principal de lo que se está haciendo.
+
+Por ejemplo, si dispusiéramos de un método que validara si un comentario es *SPAM* o no cuando un usuario inserta un nuevo comentario, tendría sentido que el usuario tuviera que esperar una respuesta a la hora de hacer el insert de dicho comentario pero no que tuviera que esperar a que se ejecute la API que lo valide posteriormente. En este caso, ese método de validación debería ser asíncrono.
+
+https://symfony.com/doc/current/messenger.html
+
+El componente <u>***Messenger***</u> es el encargado de gestionar el código asíncrono cuando usamos Symfony. Para instalarlo:
+`symfony composer require messenger` - Esto creará también el fichero *messenger.yaml* y agregará variables de entorno en el fichero *.env*
+`symfony composer require redis-messenger` - Instalar el messenger de Redis para usar Redis como cola de mensajes
+
+Cuando algún proceso deba ser ejecutado de forma asíncrona:
+1. Se envía un mensaje al bus de mensajería
+2. Este lo almacena en una cola
+3. El flujo de trabajo se reanuda y sigue ejecutándose
+
+Por otro lado, habrá un ***consumidor*** que estará ejecutándose continuamente en segundo plano para leer los mensajes encolados y ejecutar la lógica asociada. El consumidor podrá estar en el mismo servidor o en uno separado (en caso de que usemos Redis, por ejemplo).
+
+Toda la lógica se dividirá en dos elementos (objetos):
+- <u>Mensaje</u>: Será una clase que contendrá el mensaje que será transmitido. La clase solo almacenará el código del mensaje, el cual será serializado "por debajo" para almacenarse en la cola. La clase contendrá únicamente un id y un array de datos extra llamado *contexto*.
+- <u>Manejador del mensaje</u>: será una especie de *controlador* que recibe un objeto ***mensaje*** y se encarga de procesarlo. Este ***handler*** será el que deba interactuar, en nuestro ejemplo, con el validador de SPAM.
+
+Por defecto, los manejadores son llamados sincrónicamente, así que para que sean ***asíncronos*** es necesario configurar explícitamente la cola a utilizar para cada handler en la configuración del messenger (en *messenger.yml*).
   
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.

@@ -39,6 +39,14 @@ class Comment
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoFilename = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $status = null;
+
+    public function __construct()
+    {
+        $this->status = "pending"; // Pending status by default
+    }
+
     /**
      * Al mostrar relaciones de entidad (la conferencia vinculada a un comentario) EasyAdmin intenta utilizar una representación de cadena de la conferencia. 
      * De forma predeterminada utiliza una convención que utiliza el nombre de la entidad y la clave principal (por ejemplo: Conference #1) en caso de que la entidad no dispone del método __toString(), así que la agregamos para que devuelva datos más útiles que identifiquen la relación
@@ -127,6 +135,18 @@ class Comment
     public function setPhotoFilename(?string $photoFilename): self
     {
         $this->photoFilename = $photoFilename;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
