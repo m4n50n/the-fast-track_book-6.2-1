@@ -1,0 +1,11 @@
+    1  git config --global user.email "josegarciarodriguez89@hotmail.com"
+    2  git config --global user.name "Jose Clemente Garcia Rodriguez"
+    3  git config --global --add safe.directory /var/www/symfonyProject
+    4  php -v
+    5  php -m
+    6  symfony console -V
+    7  symfony version
+    8  symfony book:check-requirements
+    9  cd ..
+   10  symfony new symfonyProject --version=6.2 --webapp
+   
