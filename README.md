@@ -90,6 +90,7 @@ En Symfony hay dos tipos de paquetes que podemos implementar en los proyectos pa
 - `symfony composer require annotations`: Paquete bundle para poder configurar anotaciones en el código.
 - `symfony composer require twig` - Instalar bundle *twig*. Aunque algunos paquetes ya lo preinstalan, lo ejecutamos de nuevo para asegurarnos de tener todas las dependencias que vamos a necesitar.
 - `symfony composer require "twig/intl-extra:^3"` - Componente adicional para *twig* que necesitaremos en este proyecto para evitar errores a la hora de usar las plantillas.
+- `symfony composer require security` - Instalar bundle security. Aunque algunos paquetes ya lo preinstalan, lo ejecutamos de nuevo para asegurarnos de tener todas las dependencias que vamos a necesitar.
 - `symfony composer require orm` - Instalar el pack de librerías de Doctrine. Con esta instalación se agregarán los siguientes archivos y carpetas:
   - `/config/packages/doctrine.yaml`: Archivo de configuración. Aquí deberá especificarse la cadena de conexión a la base de datos en la propiedad `dbal`. <u>Una vez configurada y si aún no tenemos una base de datos creada</u>, la crearemos con `symfony console doctrine:database:create`. Si no da ningún error al crearla será porque la cadena de conexión es correcta.
   - `/config/packages/doctrine_migrations.yaml`: Archivo de configuración.
@@ -120,7 +121,7 @@ El entorno se definirá en la variable de entorno *APP_ENV* en el archivo `.env`
 #### Controladores
 Una página web vendrá dada por tres elementos:
 
-- Ruta
+- Ruta (`symfony console debug:router` para que se muestren todas las del sitio)
 - Controlador
 - Plantilla
   
@@ -149,7 +150,7 @@ Para administrar los datos de nuestro sitio web usaremos **Easy Admin** (https:/
 Una vez instalado (podemos buscarlo en https://github.com/symfony/recipes y en su archivo `manifest.json` se indica los alias que podemos usar para instalarlo), es necesario seguir los siguientes pasos para configurarlo:
 
 1. Generar el panel de administración web ejecutando el comando `symfony console make:admin:dashboard` (https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-route). Esto creará por defecto el fichero `/src/Controller/Admin/DashboardController.php` habilitando la URL `http://localhost:8005/admin`.
-2. Crear los controladores CRUD para administrar las entidades de *Doctrine ORM* con `symfony console make:admin:crud` aceptando los parámetros por defecto.
+2. Crear los controladores CRUD para administrar las entidades de *Doctrine ORM* con `symfony console make:admin:crud` aceptando los parámetros por defecto. Con `symfony console debug:router` podremos comprobar todas las rutas configuradas en el sitio.
 3. Vincular los controladores CRUD en el método `configureMenuItems()` dentro de `DashboardController.php` (https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#main-menu).
 4. Configurar el tablero según https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-configuration. La configuración se define en el método `configureDashboard()`.
 5. Agregar el método `__toString()` en las entidades para que las relaciones puedan mostrarse de forma práctica.
@@ -158,7 +159,22 @@ Una vez instalado (podemos buscarlo en https://github.com/symfony/recipes y en s
    - https://symfony.com/doc/6.2/the-fast-track/en/9-backend.html#customizing-easyadmin
    - https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-configuration
 
-#### Escuchando eventos
+##### Asegurando el panel de administración
+https://symfony.com/doc/current/security.html#the-user
+
+** Más información sobre administración de usuarios: https://dev.to/nabbisen/symfony-6-and-easyadmin-4-hashing-password-3eec
+
+1. Creamos un usuario admin ejecutando `symfony console make:user Admin`. <u>Si no existe la entidad *User*, la creará también en base a los parámetros que vayamos insertando en la consola</u>. Además, automáticamente configurará los parámetros de autenticación en el fichero `security.yaml`. Si a partir de aquí quisiéramos añadir más propiedades a la entidad *Admin* tendríamos que usar `symfony console make:entity`.
+2. Ejecutar `symfony console make:auth` para configurar el método de autenticación de usuarios al dashboard. Este comando hará varias cosas:
+    - Actualizará la configuración de seguridad en `security.yaml`
+    - Creará el fichero `/src/Security/AppAuthenticator.php`
+    - Creará el fichero `/src/Controller/SecurityController.php`
+    - Creará el fichero `/templates/security/login.html.twig`
+3. En este proyecto se ha configurado la parte de usuarios en el panel de administración para poder hacer CRUDs de los mismos en `AdminCrudController.php` (aunque la hemos llamado Admin, realmente la entidad será para los usuarios registrados). El hash de la password se aplicará al hacer un insert/update de un usuario mediante el subscriber `EasyAdminUserEventSubscriber`.
+
+Para crear una forma de autenticación: https://symfony.com/doc/current/security.html
+
+#### Escuchando eventos (Events y Subscribers)
 https://symfony.com/doc/6.2/the-fast-track/en/12-event.html#discovering-symfony-events
 
 https://symfony.com/doc/current/components/event_dispatcher.html
@@ -206,12 +222,11 @@ services:
       - { name: kernel.event_subscriber }
 ```
 
-
 Es importante tener en cuenta que no hay una regla fija sobre cómo debes utilizar listeners o subscribers en Symfony. Depende de tus necesidades y de cómo quieras organizar tu código. Ambos pueden ser útiles en diferentes situaciones y puedes utilizar una combinación de ambos según sea necesario.
 
 Puedes especificar qué listeners deben utilizarse para manejar diferentes eventos de seguridad, como por ejemplo el evento *InteractiveLoginEvent* que se dispara cuando un usuario inicia sesión de manera interactiva. Puedes utilizar un listener para realizar tareas adicionales cuando se dispara este evento, como por ejemplo actualizar el último inicio de sesión del usuario en la base de datos.
 
-Nota importante: No confundir el sistema de eventos de Symfony con los de Doctrine (https://symfony.com/doc/current/doctrine/events.html). Aunque los listeners sean similares, no funcionan de la misma manera.
+**Nota importante**: No confundir el sistema de eventos de Symfony con los de Doctrine (https://symfony.com/doc/current/doctrine/events.html). Aunque los listeners sean similares, no funcionan de la misma manera.
 
 #### Gestionando el ciclo de vida de los objetos de Doctrine
 https://symfony.com/doc/6.2/the-fast-track/en/13-lifecycle.html
@@ -225,6 +240,8 @@ Cómo realizar <u>callbacks simples</u>:
 - `#[ORM\PostPersist]`: Triggered con inserts. <i>Comentario añadido al método a ejecutar</i>
 - `#[ORM\PreUpdate]`: Triggered con updates. <i>Comentario añadido al método a ejecutar</i>
 - `#[ORM\PostUpdate]`: Triggered con updates. <i>Comentario añadido al método a ejecutar</i>
+
+**Los <u>callbacks complejos</u> se explica en la parte de *listeners* y *subscribers*.
   
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
