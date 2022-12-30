@@ -1,7 +1,7 @@
 ## Symfony 6: La Vía Rápida
 https://symfony.com/doc/6.2/the-fast-track/en/index.html
 
-<small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig para el frontend (aunque se realizan todos los pasos siguiendo la documentación).</small>
+<small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig, formularios y todo lo del frontend (aunque se realizan todos los pasos siguiendo la documentación).</small>
 
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
