@@ -1,7 +1,7 @@
 ## Symfony 6: La Vía Rápida
 https://symfony.com/doc/6.2/the-fast-track/en/index.html (Los pasos y toda la documentación que se sigue parte de aquí)
 
-<small>**He documentado y desarrollado todo el proyecto excepto la parte de twig, formularios y frontend que sólo la he desarrollado pero no documentado y luego, las partes de test, workflow, emails de admin y cache (pasos 17, 19, 20, 21) no están ni desarrolladas ni documentadas. En el paso 21 sí que he configurado HTTP caché pero no funciona.</small>
+<small>**He documentado y desarrollado todo el proyecto excepto la parte de twig, formularios y frontend que sólo la he desarrollado pero no documentado y luego, las partes de test, workflow, emails de admin, cache, diseño de interfaz y redimensionando imágenes (pasos 17, 19, 20, 21, 22 y 23) no están ni desarrolladas ni documentadas. En el paso 21 sí que he configurado HTTP caché pero no funciona.</small>
 
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
