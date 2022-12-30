@@ -318,6 +318,30 @@ Deberemos configurar el fichero `framework.yaml` y propiedad `http_cache` para h
 ***Evitando consultas SQL con ESI***: No desarrollada en este proyecto
 ***Caché para operaciones pesadas***: No desarrollada en este proyecto 
 
+#### Cron
+En este proyecto usaremos el cron para automatizar tareas de mantenimiento en momentos concretos.
+
+Crearemos métodos en el repositorio de comentarios para obtener y eliminar los comentarios marcados como SPAM que hayan sido creados desde hace 7 días.
+
+Normalmente para estos casos crearíamos un endpoint al que se llamaría desde una tarea configurada en el cron, pero esto no es del todo correcto ni seguro. 
+
+Lo mejor es que creemos un comando CLI que además se mantendrá dentro de un ámbito privado de la aplicación. En este caso, podríamos además configurar un tiempo máximo de respuesta alto o ilimitado, cosa que no podríamos permitir en un servidor Apache, por ejemplo.
+
+https://symfony.com/doc/6.2/the-fast-track/en/24-cron.html#creating-a-cli-command
+
+Al ser el comando un proceso interno podemos mantener mayor control, pensando en que podrían ser, por ejemplo, procesos asíncronos como conectores, migraciones, etc...
+
+Ejecutaremos `symfony console make:command` para crear un comando al que llamaremos `app:comment:cleanup` (habrá que seguir siempre la misma nomenclatura: app + subespacios de nombres separados por `:`). Esto creará `/src/Command/CommentCleanupCommand.php` donde aplicaremos toda la lógica.
+
+Este comando estará disponible en la lista de comandos de Symfony cuando escribamos `symfony console list`
+
+Si ejecutamos `symfony console help app:comment:cleanup` se mostrará la información del comando y los parámetros que podemos pasarle (configurados) en la clase (como *dry-run* por ejemplo, el cual podemos ejecutar con symfony console app:comment:cleanup --dry-run para que únicamente nos ejecute la lógica aplicada cuando se pasa este argumento).
+
+##### Configurando la tarea en el cron
+1. `crontab -e` - Abrir el editor de tareas
+2. Configurar la tarea para que se ejecute todos los días a las 23:50 hrs:
+  - `50 23 * * * cd /var/www/symfonyProject && symfony console app:comment:cleanup`
+
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
 https://www.php.net/manual/es/language.generators.syntax.php#:~:text=En%20su%20forma%20m%C3%A1s%20simple,ejecuci%C3%B3n%20de%20la%20funci%C3%B3n%20generadora

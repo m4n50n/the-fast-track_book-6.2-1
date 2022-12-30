@@ -41,3 +41,4 @@ symfony server:log
 symfony server:status
 symfony console messenger:failed:show
 symfony console messenger:failed:retry
+symfony console make:command
