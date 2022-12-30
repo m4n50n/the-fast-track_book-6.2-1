@@ -210,7 +210,22 @@ services:
 Es importante tener en cuenta que no hay una regla fija sobre cómo debes utilizar listeners o subscribers en Symfony. Depende de tus necesidades y de cómo quieras organizar tu código. Ambos pueden ser útiles en diferentes situaciones y puedes utilizar una combinación de ambos según sea necesario.
 
 Puedes especificar qué listeners deben utilizarse para manejar diferentes eventos de seguridad, como por ejemplo el evento *InteractiveLoginEvent* que se dispara cuando un usuario inicia sesión de manera interactiva. Puedes utilizar un listener para realizar tareas adicionales cuando se dispara este evento, como por ejemplo actualizar el último inicio de sesión del usuario en la base de datos.
-   
+
+Nota importante: No confundir el sistema de eventos de Symfony con los de Doctrine (https://symfony.com/doc/current/doctrine/events.html). Aunque los listeners sean similares, no funcionan de la misma manera.
+
+#### Gestionando el ciclo de vida de los objetos de Doctrine
+https://symfony.com/doc/6.2/the-fast-track/en/13-lifecycle.html
+https://symfony.com/doc/4.1/doctrine/common_extensions.html
+https://symfony.com/bundles/StofDoctrineExtensionsBundle/current/index.html
+https://symfony.com/doc/current/doctrine/events.html -> Sistema de eventos de Doctrine
+
+Cómo realizar <u>callbacks simples</u>:
+- `#[ORM\HasLifecycleCallbacks]`: <i>Comentario a añadir antes de definir la clase</i>
+- `#[ORM\PrePersist]`: Triggered con inserts. <i>Comentario añadido al método a ejecutar</i>
+- `#[ORM\PostPersist]`: Triggered con inserts. <i>Comentario añadido al método a ejecutar</i>
+- `#[ORM\PreUpdate]`: Triggered con updates. <i>Comentario añadido al método a ejecutar</i>
+- `#[ORM\PostUpdate]`: Triggered con updates. <i>Comentario añadido al método a ejecutar</i>
+  
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
 https://www.php.net/manual/es/language.generators.syntax.php#:~:text=En%20su%20forma%20m%C3%A1s%20simple,ejecuci%C3%B3n%20de%20la%20funci%C3%B3n%20generadora

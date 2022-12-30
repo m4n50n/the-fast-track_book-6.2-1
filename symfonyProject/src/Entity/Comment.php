@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Comment
 {
     #[ORM\Id]
@@ -36,7 +37,7 @@ class Comment
     /**
      * Al mostrar relaciones de entidad (la conferencia vinculada a un comentario) EasyAdmin intenta utilizar una representación de cadena de la conferencia. 
      * De forma predeterminada utiliza una convención que utiliza el nombre de la entidad y la clave principal (por ejemplo: Conference #1) en caso de que la entidad no dispone del método __toString(), así que la agregamos para que devuelva datos más útiles que identifiquen la relación
-     */    
+     */
     public function __toString(): string
     {
         return (string) $this->getEmail();
@@ -93,6 +94,12 @@ class Comment
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getConference(): ?Conference

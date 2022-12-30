@@ -6,8 +6,14 @@ use App\Repository\ConferenceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[ORM\Entity(repositoryClass: ConferenceRepository::class)]
+
+# https://symfony.com/doc/current/reference/constraints/UniqueEntity.html
+# Validates that a particular field (or fields) in a Doctrine entity is (are) unique
+#[UniqueEntity('slug')]
 class Conference
 {
     #[ORM\Id]
@@ -27,6 +33,10 @@ class Conference
     #[ORM\OneToMany(mappedBy: 'conference', targetEntity: Comment::class, orphanRemoval: true)]
     private Collection $comments;
 
+    // #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    private ?string $slug = null;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
@@ -35,10 +45,18 @@ class Conference
     /**
      * Al mostrar relaciones de entidad (la conferencia vinculada a un comentario) EasyAdmin intenta utilizar una representación de cadena de la conferencia. 
      * De forma predeterminada utiliza una convención que utiliza el nombre de la entidad y la clave principal (por ejemplo: Conference #1) en caso de que la entidad no dispone del método __toString(), así que la agregamos para que devuelva datos más útiles que identifiquen la relación
-     */    
+     */
     public function __toString(): string
     {
-        return $this->city.' '.$this->year;
+        return $this->city . ' ' . $this->year;
+    }
+
+    // Para esto hemos creado el listener ConferenceEntityListener, por lo que será más complejo que lo que hicimos en el método setCreatedAtValue() de la entidad comments
+    public function computeSlug(SluggerInterface $slugger)
+    {
+        if (!$this->slug || $this->slug === '-') {
+            $this->slug = (string) $slugger->slug((string) $this)->lower();
+        }
     }
 
     public function getId(): ?int
@@ -108,6 +126,18 @@ class Conference
                 $comment->setConference(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }
