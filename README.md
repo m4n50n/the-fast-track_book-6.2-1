@@ -1,6 +1,8 @@
 ## Symfony 6: La Vía Rápida
 https://symfony.com/doc/6.2/the-fast-track/en/index.html
 
+<small>**Se documenta todo el proyecto excepto las partes relacionadas con las plantillas de Twig para el frontend (aunque se realizan todos los pasos siguiendo la documentación).</small>
+
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
 git config --global user.email "josegarciarodriguez89@hotmail.com"
@@ -87,6 +89,7 @@ En Symfony hay dos tipos de paquetes que podemos implementar en los proyectos pa
 - `symfony composer require symfony/maker-bundle --dev`: Es un bundle generador de código que nos permite crear de manera rápida mucho de los elementos de Symfony. En este caso lo instalamos sólo para el entorno de desarrollo. Para ver la lista de cosas que podemos generar con este bundle podemos hacer `symfony console list` o `symfony console list make`.
 - `symfony composer require annotations`: Paquete bundle para poder configurar anotaciones en el código.
 - `symfony composer require twig` - Instalar bundle *twig*. Aunque algunos paquetes ya lo preinstalan, lo ejecutamos de nuevo para asegurarnos de tener todas las dependencias que vamos a necesitar.
+- `symfony composer req "twig/intl-extra:^3"` - Componente adicional para *twig* que necesitaremos en este proyecto para evitar errores a la hora de usar las plantillas.
 - `symfony composer require orm` - Instalar el pack de librerías de Doctrine. Con esta instalación se agregarán los siguientes archivos y carpetas:
   - `/config/packages/doctrine.yaml`: Archivo de configuración. Aquí deberá especificarse la cadena de conexión a la base de datos en la propiedad `dbal`. <u>Una vez configurada y si aún no tenemos una base de datos creada</u>, la crearemos con `symfony console doctrine:database:create`. Si no da ningún error al crearla será porque la cadena de conexión es correcta.
   - `/config/packages/doctrine_migrations.yaml`: Archivo de configuración.
