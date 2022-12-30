@@ -153,10 +153,10 @@ Una vez instalado, es necesario seguir los siguientes pasos para configurarlo:
 https://www.php.net/manual/es/language.generators.syntax.php#:~:text=En%20su%20forma%20m%C3%A1s%20simple,ejecuci%C3%B3n%20de%20la%20funci%C3%B3n%20generadora
 
 #### Enlaces de interés
-► PhpStorm: https://www.jetbrains.com/es-es/phpstorm/
-► PHP: http://php.net/
-► Composer: https://getcomposer.org/
-► Docker: https://www.docker.com/
-► Docker compose: https://docs.docker.com/compose/install/
-► Symfony CLI: https://symfony.com/download
-► Documentación oficial del libro: https://symfony.com/doc/6.2/the-fast-track/en/index.html
+- **PhpStorm**: https://www.jetbrains.com/es-es/phpstorm/
+- **PHP**: http://php.net/
+- **Composer**: https://getcomposer.org/
+- **Docker**: https://www.docker.com/
+- **Docker compose**: https://docs.docker.com/compose/install/
+- **Symfony CLI**: https://symfony.com/download
+- **Documentación oficial** del libro: https://symfony.com/doc/6.2/the-fast-track/en/index.html
