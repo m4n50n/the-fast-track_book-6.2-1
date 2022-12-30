@@ -18,6 +18,7 @@ symfony composer require annotations
 symfony console make:controller ConferenceController
 symfony console make:controller TestController
 symfony composer require twig
+symfony composer require "twig/intl-extra:^3"
 symfony composer require orm
 symfony console doctrine:database:create
 symfony console make:entity Conference

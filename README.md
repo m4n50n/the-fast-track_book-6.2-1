@@ -89,7 +89,7 @@ En Symfony hay dos tipos de paquetes que podemos implementar en los proyectos pa
 - `symfony composer require symfony/maker-bundle --dev`: Es un bundle generador de código que nos permite crear de manera rápida mucho de los elementos de Symfony. En este caso lo instalamos sólo para el entorno de desarrollo. Para ver la lista de cosas que podemos generar con este bundle podemos hacer `symfony console list` o `symfony console list make`.
 - `symfony composer require annotations`: Paquete bundle para poder configurar anotaciones en el código.
 - `symfony composer require twig` - Instalar bundle *twig*. Aunque algunos paquetes ya lo preinstalan, lo ejecutamos de nuevo para asegurarnos de tener todas las dependencias que vamos a necesitar.
-- `symfony composer req "twig/intl-extra:^3"` - Componente adicional para *twig* que necesitaremos en este proyecto para evitar errores a la hora de usar las plantillas.
+- `symfony composer require "twig/intl-extra:^3"` - Componente adicional para *twig* que necesitaremos en este proyecto para evitar errores a la hora de usar las plantillas.
 - `symfony composer require orm` - Instalar el pack de librerías de Doctrine. Con esta instalación se agregarán los siguientes archivos y carpetas:
   - `/config/packages/doctrine.yaml`: Archivo de configuración. Aquí deberá especificarse la cadena de conexión a la base de datos en la propiedad `dbal`. <u>Una vez configurada y si aún no tenemos una base de datos creada</u>, la crearemos con `symfony console doctrine:database:create`. Si no da ningún error al crearla será porque la cadena de conexión es correcta.
   - `/config/packages/doctrine_migrations.yaml`: Archivo de configuración.
@@ -97,7 +97,14 @@ En Symfony hay dos tipos de paquetes que podemos implementar en los proyectos pa
   - `/src/Entity`: Carpeta para entidades (clases que representarán a cada tabla). Las crearemos con `symfony console make:entity` y bastará con seguir la "guía" que aparecerá. También podemos usar `symfony console make:entity NombreEntidad` para establecer el nombre desde el propio comando.
   - `/src/Repository`: Clases que ayudarán a centralizar las sentencias SQL que usaremos en cada entidad.
   - La cadena de conexión a la base de datos irá en el fichero `.env`
-- `symfony composer require "admin:^4"` - Instalar el backend de administración *EasyAdmin* ("admin" es un alias para el paquete *easycorp/easyadmin-bundle*).
+- `symfony composer require "admin:^4"` - Instalar el backend de administración *EasyAdmin* ("admin" es un alias para el paquete *easycorp/easyadmin-bundle*). Con esta instalación se agregarán los siguientes archivos y carpetas:
+  - Se añaden *SecurityBundle* y *EasyAdminBundle* a la lista de bundles en `/config/bundles.php`
+  - Se crea la carpeta `/translations`
+  - Se crean los archivos:
+    - `/config/packages/security.yaml`: Aquí configuraremos parámetros de seguridad como por ejemplo el control de acceso por rutas en la parte de *access_control* (https://symfony.com/bundles/EasyAdminBundle/current/security.html#security-entire-backend).
+    - `/config/packages/translation.yaml`: Para configurar parámetros de idioma (y así poner en español el Dashboard, por ejemplo). 
+    - `/config/packages/uid.yaml`
+    - `/config/packages/validator.yaml`
 
 #### Entornos en Symfony
 Symfony dispone de tres tipos de entornos, los cuales comparten el mismo código fuente pero tienen configuraciones diferentes:
@@ -139,7 +146,7 @@ Para trabajar con bases de datos, Symfony usa *Doctrine*, que es un conjunto de 
 #### Bundle de administración de Backoffice
 Para administrar los datos de nuestro sitio web usaremos **Easy Admin** (https://symfony.com/bundles/EasyAdminBundle/current/index.html), considerado el bundle de administración oficial por parte de Symfony.
 
-Una vez instalado, es necesario seguir los siguientes pasos para configurarlo:
+Una vez instalado (podemos buscarlo en https://github.com/symfony/recipes y en su archivo `manifest.json` se indica los alias que podemos usar para instalarlo), es necesario seguir los siguientes pasos para configurarlo:
 
 1. Generar el panel de administración web ejecutando el comando `symfony console make:admin:dashboard` (https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-route). Esto creará por defecto el fichero `/src/Controller/Admin/DashboardController.php` habilitando la URL `http://localhost:8005/admin`.
 2. Crear los controladores CRUD para administrar las entidades de *Doctrine ORM* con `symfony console make:admin:crud` aceptando los parámetros por defecto.
@@ -150,6 +157,15 @@ Una vez instalado, es necesario seguir los siguientes pasos para configurarlo:
 7. El panel de administración puede configurarse de forma personalizada siguiendo:
    - https://symfony.com/doc/6.2/the-fast-track/en/9-backend.html#customizing-easyadmin
    - https://symfony.com/bundles/EasyAdminBundle/current/dashboards.html#dashboard-configuration
+
+#### Events y Subscribers
+https://symfony.com/doc/current/components/event_dispatcher.html
+
+Symfony cuenta con un componente propio para disparar o lanzar elementos: ***Event Dispatcher***. Estos eventos pueden ser escuchados por los ***Subscribers***, que reaccionarán a lo ocurrido.
+
+<u>Para poder detectar un evento</u> podemos crear un suscriptor (subscriber) que contenga un método estático `getSubscriberdEvents()` que permitirá la configuración.
+
+Para crear un subscriber podemos usar el ***maker-bundle*** de Symfony haciendo `symfony console make:subscriber`
    
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.
