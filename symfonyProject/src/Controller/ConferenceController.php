@@ -54,8 +54,8 @@ class ConferenceController extends AbstractController
         return $this->render('conference/index.html.twig', [
             'conferences' => $conferenceRepository->findAll(),
             // ]));
-        ]);
-        // ])->setSharedMaxAge(3605); # Guardar la caché de esta página durante una hora
+            // ]);
+        ])->setSharedMaxAge(3605); # Guardar la caché de esta página durante una hora
     }
 
     # #[Route('/conference/{id}', name: 'conference')]
