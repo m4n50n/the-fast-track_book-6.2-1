@@ -42,3 +42,5 @@ symfony server:status
 symfony console messenger:failed:show
 symfony console messenger:failed:retry
 symfony console make:command
+symfony composer require redis-messenger
+symfony composer install

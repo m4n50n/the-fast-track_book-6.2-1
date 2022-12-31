@@ -1,7 +1,22 @@
-## Symfony 6: La Vía Rápida
+## Symfony 6: Symfony_The-Fast-Track-Book_6.2-1
 https://symfony.com/doc/6.2/the-fast-track/en/index.html (Los pasos y toda la documentación que se sigue parte de aquí)
 
-<small>**He documentado y desarrollado todo el proyecto excepto la parte de twig, formularios y frontend que sólo la he desarrollado pero no documentado y luego, las partes de test, workflow, emails de admin, cache, diseño de interfaz y redimensionando imágenes (pasos 17, 19, 20, 21, 22 y 23) no están ni desarrolladas ni documentadas. En el paso 21 sí que he configurado HTTP caché pero no funciona.</small>
+<small>
+**<u><b>Las siguientes partes del proyecto no se han desarrollado ni documentado</u></b>:<br>
+Testing (Paso 17)<br>
+Making Decisions with a Workflow (Paso 19)<br>
+Emailing Admins (Paso 20)<br>
+Caching for Performance (Paso 21) - Aquí he llegado a configurar HTTP caché pero no funciona<br>
+Styling the User Interface with Webpack (Paso 22)<br>
+Resizing Images (Paso 23)<br>
+Notifying by all Means (Paso 25)<br>
+Exposing an API with API Platform (Paso 26)<br>
+Building an SPA (Paso 27)<br>
+Localizing an Application (Paso 28)<br>
+Managing Performance (Paso 29)<br>
+Discovering Symfony Internals (Paso 30)<br>
+Using RabbitMQ as a Message Broker (Paso 32)<br>
+</small>
 
 ```bash
 # Parámetros de configuración de Git dentro de la máquina (recomendable antes de crear una nueva app de Symfony)
@@ -12,8 +27,6 @@ git config --global --add safe.directory /var/www/symfonyProject
 
 ### Descripción del proyecto
 Tendremos una lista de conferencias en la página de inicio y una página para cada conferencia en la que se insertarán comentarios. Un comentario se compondrá de un texto y una imagen opcional.
-
-El proyecto consistirá en una web tradicional con frontend, backend y un SPA para teléfonos móviles.
 
 #### Creando el proyecto
 
@@ -318,7 +331,7 @@ Deberemos configurar el fichero `framework.yaml` y propiedad `http_cache` para h
 ***Evitando consultas SQL con ESI***: No desarrollada en este proyecto
 ***Caché para operaciones pesadas***: No desarrollada en este proyecto 
 
-#### Cron
+#### Cron (Symfony Commands)
 En este proyecto usaremos el cron para automatizar tareas de mantenimiento en momentos concretos.
 
 Crearemos métodos en el repositorio de comentarios para obtener y eliminar los comentarios marcados como SPAM que hayan sido creados desde hace 7 días.
@@ -341,6 +354,31 @@ Si ejecutamos `symfony console help app:comment:cleanup` se mostrará la informa
 1. `crontab -e` - Abrir el editor de tareas
 2. Configurar la tarea para que se ejecute todos los días a las 23:50 hrs:
   - `50 23 * * * cd /var/www/symfonyProject && symfony console app:comment:cleanup`
+
+#### Redis
+https://symfony.com/doc/6.2/the-fast-track/en/31-redis.html
+
+Redis es un motor de base de datos (NoSQL) en memoria. No está enfocado al almacenamiento persistente de datos, por lo que su almacenamiento se encuentra en memoria para acelerar las consultas a estos datos y aumentar la velocidad de carga, por ejemplo. No usa tablas ni nada por el estilo, sino un almacenamiento de datos en forma de clave -> valor. Muy similar a trabajar con arrays.
+
+Por ejemplo, si tenemos una lista de países, podriamos guardarlos en la caché en lugar de hacer siempre las mismas peticiones a la base de datos y así ahorrar tiempo.
+
+También podríamos usar Redis para guardar los logs de Symfony en lugar de usar *Monolog* (que es el que tiene por defecto que guarda los logs en `/var/log`)
+
+Para almacenar las sesiones en una base de datos Redis haremos lo siguiente:
+1. En la propiedad *session* del fichero `/config/packages/framework.yaml` establecemos el valor `handler_id: '%env(REDIS_URL)%'`
+2. En el fichero `.env` establecemos la variable de entorno `REDIS_URL="redis://redis@host.docker.internal:6304"`
+3. Para comprobar que funciona, en algún método de nuestro proyecto podemos ejecutar:
+   - `$session->set("RedisTEST", "Esta es una prueba de Redis");` Para guardar un valor en la sesión actual
+   - `dump($session->get("RedisTEST"));` Para obtener un valor de la sesión (se verá en el profiler)
+
+Para comprobarlo en la propia máquina de Redis, iniciamos la misma con `docker exec -it 04_redis_alpine sh`, y posteriormente ejecutamos los siguientes comandos:
+- `redis-cli` abrirá una especie de "sesión" del tipo ***127.0.0.1:6379>***
+- `AUTH redis` (redis será la password)
+- `KEYS *` para ver los datos guardados
+- Posteriormente podemos copiar alguna key y hacer `GET key_copiada` y podremos ver los datos que almacena
+
+▪ Documentación - https://redis.io/resources/clients/
+▪ Clientes de Redis para PHP - https://redis.io/docs/
 
 #### Otras notas
 **yield es parecido a return, pero en lugar de detener la ejecución de la función y devolver un valor, yield facilita el valor al bucle que itera sobre el generador y pausa la ejecución de la función generadora.

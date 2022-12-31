@@ -6,12 +6,13 @@ framework:
     handle_all_throwables: true
     
     # Habilitar el proxy inverso HTTP de Symfony
-    http_cache: true
+    # http_cache: true
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.
     session:
-        handler_id: null
+        # handler_id: null # De forma predeterminada se trabaja con archivos, pero queremos que almacenen en Redis
+        handler_id: '%env(REDIS_URL)%'
         cookie_secure: auto
         cookie_samesite: lax
         storage_factory_id: session.storage.factory.native

@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
@@ -29,11 +30,15 @@ class ConferenceController extends AbstractController
     #[Route('/', name: 'homepage')]
     // public function index(): Response
     // public function index(Environment $twig, ConferenceRepository $conferenceRepository): Response
-    public function index(ConferenceRepository $conferenceRepository): Response
+    public function index(ConferenceRepository $conferenceRepository, SessionInterface $session): Response
     {
         // return $this->render('conference/index.html.twig', [
         //     'controller_name' => 'ConferenceController',
         // ]);
+
+        // Testing REDIS
+        // $session->set("Redis Test", ["PropertyName" => "Teeest!"]); // Almacenar datos en la sesión
+        # dump($session->get("RedisTEST")); // Mostrar datos almacenados (se verán en la barra del profiler)
 
         // return new Response(
         //     <<<EOF
@@ -49,8 +54,8 @@ class ConferenceController extends AbstractController
         return $this->render('conference/index.html.twig', [
             'conferences' => $conferenceRepository->findAll(),
             // ]));
-            // ]);
-        ])->setSharedMaxAge(3605); # Guardar la caché de esta página durante una hora
+        ]);
+        // ])->setSharedMaxAge(3605); # Guardar la caché de esta página durante una hora
     }
 
     # #[Route('/conference/{id}', name: 'conference')]

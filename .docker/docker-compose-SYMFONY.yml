@@ -189,19 +189,19 @@ services:
   ### web Server projects ###
   
   ### REDIS
-  # redis:
-  #   container_name: ${PREFIX_PROJECT_NAME}_redis_${REDIS_VER}
-  #   image: redis:${REDIS_VER}
-  #   command: redis-server --requirepass ${REDIS_PASSWORD}
-  #   volumes:
-  #     - ./redis-data:/var/lib/redis
-  #     - ./redis_data:/data
-  #     - ./configFiles/redis.conf:/usr/local/etc/redis/redis.conf
-  #   ports:
-  #   - ${REDIS_PORT}:6379
-  #   environment:
-  #   - REDIS_REPLICATION_MODE=master
-  #   restart: unless-stopped
+  redis:
+    container_name: ${PREFIX_PROJECT_NAME}_redis_${REDIS_VER}
+    image: redis:${REDIS_VER}
+    command: redis-server --requirepass ${REDIS_PASSWORD} && apk add net-tools
+    volumes:
+      - ./redis-data:/var/lib/redis
+      - ./redis_data:/data
+      - ./configFiles/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - ${REDIS_PORT}:6379
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    restart: unless-stopped
 
 networks:
   ${PREFIX_PROJECT_NAME}:
