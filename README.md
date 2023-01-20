@@ -375,6 +375,7 @@ Para comprobarlo en la propia máquina de Redis, iniciamos la misma con `docker 
 - `redis-cli` abrirá una especie de "sesión" del tipo ***127.0.0.1:6379>***
 - `AUTH redis` (redis será la password)
 - `KEYS *` para ver los datos guardados
+- `FLUSHALL` eliminará todas las keys de todas las bases de datos de Redis (https://www.shellhacks.com/redis-delete-all-keys-redis-cli/)
 - Posteriormente podemos copiar alguna key y hacer `GET key_copiada` y podremos ver los datos que almacena
 
 ▪ Documentación - https://redis.io/resources/clients/
