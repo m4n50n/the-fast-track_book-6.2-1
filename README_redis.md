@@ -73,7 +73,7 @@ Output
 1) "I"
 2) "am"
 3) "sayeth"
-4) 
+
 Para recuperar un solo elemento de una lista, puede usar el comando `lindex` Sin embargo, este comando requiere que proporcione el índice del elemento como argumento. Al igual que con `lrange`, el índice tiene base cero, lo que significa que el primer elemento está en el índice 0, el segundo está en el índice 1, y así sucesivamente:
 
 `lindex key_philosophy1 4`
